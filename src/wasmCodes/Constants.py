@@ -1,0 +1,3 @@
+FUNCTION_TYPE: bytes = 0x60
+
+EMPTY_ARRAY: bytes = 0x0

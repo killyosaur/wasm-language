@@ -4,3 +4,4 @@
 **/*.wasm
 
 **/.vs
+**/__pycache__
