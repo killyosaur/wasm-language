@@ -1,5 +1,3 @@
-def signedLEB128(number):
-    return bytearray(number.to_bytes(16, byteorder='little', signed=True))
+signedLEB128 = lambda number: bytearray(number.to_bytes(16, byteorder='little', signed=True))
 
-def unsignedLEB128(number):
-    return bytearray(number.to_bytes(16, byteorder='little', signed=False))
+unsignedLEB128 = lambda number: bytearray(number.to_bytes(16, byteorder='little', signed=False))

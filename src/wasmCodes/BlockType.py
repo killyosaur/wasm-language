@@ -1,4 +1,4 @@
 from enum import Enum
 
 class BlockType(Enum):
-    VOID: bytes = 0x40
+    VOID = bytearray([0x40])

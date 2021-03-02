@@ -6,10 +6,14 @@ const magicModuleHeader = [0x00, 0x61, 0x73, 0x6d];
 const moduleVersion = [0x01, 0x00, 0x00, 0x00];
 const flatten = (arr: any[]) => [].concat.apply([], arr);
 
-const encodeVector = (data: any[]) => [
-    unsignedLEB128(data.length),
-    ...flatten(data)
-];
+const encodeVector = (data: any[]) => {
+    console.log(`encoding length: ${data.length}`);
+    console.log(`encoding data: ${data}`)
+    return [
+        unsignedLEB128(data.length),
+        ...flatten(data)
+    ]
+};
 
 const createSection = (sectionType: Section, data: any[]) => [
     sectionType,

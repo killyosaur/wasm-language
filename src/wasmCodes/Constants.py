@@ -1,3 +1,3 @@
-FUNCTION_TYPE: bytes = 0x60
+FUNCTION_TYPE = bytearray([0x60])
 
-EMPTY_ARRAY: bytes = 0x0
+EMPTY_ARRAY = bytearray([0x0])

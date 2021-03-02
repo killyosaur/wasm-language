@@ -1,28 +1,28 @@
 from enum import Enum
 
 class OpCodes(Enum):
-    BLOCK: bytes = 0x02
-    LOOP: bytes = 0x03
-    BR: bytes = 0x0c
-    BR_IF: bytes = 0x0d
-    END: bytes = 0x0b
-    CALL: bytes = 0x10
-    GET_LOCAL: bytes = 0x20
-    SET_LOCAL: bytes = 0x21
-    I32_STORE_8: bytes = 0x3a
-    I32_CONST: bytes = 0x41
-    F32_CONST: bytes = 0x43
-    I32_EQZ: bytes = 0x45
-    I32_EQ: bytes = 0x46
-    F32_EQ: bytes = 0x5b
-    F32_LT: bytes = 0x5d
-    F32_GT: bytes = 0x5e
-    I32_AND: bytes = 0x71
-    F32_ADD: bytes = 0x92
-    F32_SUB: bytes = 0x93
-    F32_MUL: bytes = 0x94
-    F32_DIV: bytes = 0x95
-    I32_TRUNC_F32_S: bytes = 0xa8
+    BLOCK = bytearray([0x02])
+    LOOP = bytearray([0x03])
+    BR = bytearray([0x0c])
+    BR_IF = bytearray([0x0d])
+    END = bytearray([0x0b])
+    CALL = bytearray([0x10])
+    GET_LOCAL = bytearray([0x20])
+    SET_LOCAL = bytearray([0x21])
+    I32_STORE_8 = bytearray([0x3a])
+    I32_CONST = bytearray([0x41])
+    F32_CONST = bytearray([0x43])
+    I32_EQZ = bytearray([0x45])
+    I32_EQ = bytearray([0x46])
+    F32_EQ = bytearray([0x5b])
+    F32_LT = bytearray([0x5d])
+    F32_GT = bytearray([0x5e])
+    I32_AND = bytearray([0x71])
+    F32_ADD = bytearray([0x92])
+    F32_SUB = bytearray([0x93])
+    F32_MUL = bytearray([0x94])
+    F32_DIV = bytearray([0x95])
+    I32_TRUNC_F32_S = bytearray([0xa8])
 
 binaryOpCodes = {
     "+": OpCodes.F32_ADD.value,

@@ -1,0 +1,2 @@
+FLOAT32 = 0x7d
+INT32 = 0x7f

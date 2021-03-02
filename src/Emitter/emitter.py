@@ -8,23 +8,37 @@ from wasmCodes.Constants import EMPTY_ARRAY, FUNCTION_TYPE
 from wasmCodes.ExportTypes import ExportTypes
 from Infrastructure.switcher import Switcher
 
-magicModuleHeader = [0x00, 0x61, 0x73, 0x6d]
-moduleVersion = [0x01, 0x00, 0x00, 0x00]
+magicModuleHeader = bytearray([0x00, 0x61, 0x73, 0x6d])
+moduleVersion = bytearray([0x01, 0x00, 0x00, 0x00])
 
 flatten = lambda arr: [item for sublist in arr for item in sublist]
 
-encodeVector = lambda data: [unsignedLEB128(len(data))].extend(flatten(data))
+def encodeVector(data: bytearray): 
+    byteResult = bytearray()
+    byteResult.extend(unsignedLEB128(len(data)))
+    print(f"encoding: {data}")
+    byteResult.extend(flatten(data))
+    return byteResult
 
-encodeLocal = lambda count, type: unsignedLEB128(count).__add__(type)
+def encodeLocal(count: int, typeValue: bytearray): 
+    byteResult = bytearray()
+    byteResult.extend(unsignedLEB128(count))
+    byteResult.extend(typeValue)
+    return byteResult
 
-createSection = lambda sectionType, data: [sectionType.to_bytes()].extend(encodeVector(data))
+def createSection(sectionType: int, data: bytearray): 
+    byteResult = bytearray()
+    byteResult.extend(unsignedLEB128(sectionType))
+    byteResult.extend(encodeVector(data))
+    return byteResult
+
 
 def codeFromAst(ast: list):
-    code = []
+    code = bytearray()
 
     def emitExpression(node):
         def numberLiteralCase(code):
-            code.append(bytearray(OpCodes.F32_CONST.value))
+            code.extend(OpCodes.F32_CONST.value)
             code.extend(ieee754(node.value))
 
         emitSwitcher = Switcher({
@@ -35,7 +49,7 @@ def codeFromAst(ast: list):
 
     def printStmt(stmt, code):
         emitExpression(stmt.expression)
-        code.append(OpCodes.CALL.value)
+        code.extend(OpCodes.CALL.value)
         code.extend(unsignedLEB128(0))
     
     for statement in ast:
@@ -47,34 +61,34 @@ def codeFromAst(ast: list):
 def Emitter(ast):
     voidVoidType = [FUNCTION_TYPE, EMPTY_ARRAY, EMPTY_ARRAY]
 
-    floatBytes = bytearray(ValueTypes.FLOAT32.value)
-    floatVoidType = bytearray(FUNCTION_TYPE)
-    floatVoidType.extend(encodeVector(floatBytes))
-    floatVoidType.append(bytearray(EMPTY_ARRAY))
+    floatVoidType = FUNCTION_TYPE
+    floatVoidType.extend(encodeVector(ValueTypes.FLOAT32.value))
+    floatVoidType.extend(EMPTY_ARRAY)
+    
+    typeSection = createSection(Sections.TYPE.value, flatten([voidVoidType, floatVoidType]))
 
-    typeSection = createSection(Sections.TYPE, encodeVector([voidVoidType, floatVoidType]))
-
-    funcSection = createSection(Sections.FUNC, encodeVector(bytearray(0x00.to_bytes())))
+    funcSection = createSection(Sections.FUNC.value, bytearray(0x00))
 
     printFunctionImport = flatten([
         encodeString("env"),
         encodeString("print"),
-        [ExportTypes.FUNC.value, bytearray(0x01.to_bytes())]
+        ExportTypes.FUNC.value,
+        bytearray(0x01)
     ])
 
-    importSection = createSection(Sections.IMPORT, encodeVector([printFunctionImport]))
+    importSection = createSection(Sections.IMPORT.value, printFunctionImport)
 
-    exportSection = createSection(Sections.EXPORT, encodeVector([
-        encodeString("run").__add__(bytearray(ExportTypes.FUNC.value)).__add__(bytearray(0x01.to_bytes()))
-    ]))
+    exportSection = createSection(Sections.EXPORT.value, 
+        flatten([encodeString("run"), ExportTypes.FUNC.value, bytearray(0x01)])
+    )
 
     functionBody = encodeVector(flatten([
-        bytearray(EMPTY_ARRAY),
+        EMPTY_ARRAY,
         codeFromAst(ast),
-        bytearray(OpCodes.END.value)
+        OpCodes.END.value
     ]))
 
-    codeSection = createSection(Sections.CODE, encodeVector([functionBody]))
+    codeSection = createSection(Sections.CODE.value, functionBody)
 
     return bytearray(flatten([
         magicModuleHeader,

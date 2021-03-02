@@ -1,5 +1,5 @@
 from enum import Enum
 
 class ValueTypes(Enum):
-    INT32: bytes = 0x7f
-    FLOAT32: bytes = 0x7d
+    INT32 = bytearray([0x7f])
+    FLOAT32 = bytearray([0x7d])

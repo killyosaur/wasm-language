@@ -8,6 +8,7 @@ describe("emitter", () => {
 
     test("simple add function", async () => {
         const wasm = emitter();
+        console.log(wasm);
         const {instance} = await WebAssembly.instantiate(wasm);
 
         expect(instance.exports.run(5, 6)).toBe(11);

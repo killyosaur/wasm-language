@@ -1,0 +1,3 @@
+GET_LOCAL = 0x20
+F32_ADD = 0x92
+END = 0x0b
