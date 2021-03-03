@@ -1,10 +1,8 @@
-from wasmCode import opCodes
-from wasmCode import section
-from wasmCode import exportTypes
-from wasmCode import valTypes
+from wasmCode import opCodes, section, exportTypes, valTypes
 from collections.abc import Iterable
-from encoding import unsignedLEB128
-from encoding import encodeString
+from encoding import unsignedLEB128, encodeString, ieee754
+from models.node import Program, ExpressionNode
+from infrastructure.switcher import switch
 
 magicModuleHeader = [0x00, 0x61, 0x73, 0x6d]
 moduleVersion = [0x01, 0x00, 0x00, 0x00]
@@ -26,23 +24,65 @@ def encodeVector(data):
     result.extend(flatten(data))
     return result
 
+def encodeLocal(count: int, typeVal: int):
+    result = []
+    result.append(unsignedLEB128(count))
+    result.append(typeVal)
+    return result
+
 def createSection(sectionType: int, data: list):
     result = []
     result.append(sectionType)
     result.extend(encodeVector(data))
     return result
 
-def emitter():
-    addFunctionType = []
-    addFunctionType.append(FUNCTION_TYPE)
-    addFunctionType.extend(encodeVector([valTypes.FLOAT32, valTypes.FLOAT32]))
-    addFunctionType.extend(encodeVector([valTypes.FLOAT32]))
+def codeFromAst(ast: Program):
+    code: list[int] = []
 
-    typeSection = createSection(section.TYPE, encodeVector([addFunctionType]))
+    def emitExpression(node: ExpressionNode):
+        def numExpr():
+            code.append(opCodes.F32_CONST)
+            code.extend(ieee754(node.value))
+
+        switch(node.type, {
+            'numberLiteral': numExpr
+        }, None)
+    
+    def processItem(item: StatementNode):
+        def printStmt():
+            emitExpression(item.expression)
+            code.append(opCodes.CALL)
+            code.append(unsignedLEB128(0))
+
+        switch(item.type, {
+            'printStatement': printStmt
+        }, None)
+    
+    ast.forEach(processItem)
+
+    return code
+
+def Emitter(ast: Program):
+    voidVoidType = [FUNCTION_TYPE, EMPTY_ARRAY, EMPTY_ARRAY]
+
+    floatVoidType = []
+    floatVoidType.append(FUNCTION_TYPE)
+    floatVoidType.extend(encodeVector([valTypes.FLOAT32]))
+    floatVoidType.append(EMPTY_ARRAY)
+
+    typeSection = createSection(section.TYPE, encodeVector([voidVoidType, floatVoidType]))
 
     funcSection = createSection(section.FUNC, encodeVector([
         0x00 # type index
     ]))
+
+    printFunctionImport = []
+    printFunctionImport.extend(encodeString('env'))
+    printFunctionImport.extend(encodeString('print'))
+    printFunctionImport.append(exportTypes.FUNC)
+    printFunctionImport.append(0x01) # type index
+
+    importSection = createSection(section.IMPORT, encodeVector([printFunctionImport]))
 
     exportData = []
     exportData.extend(encodeString('run'))
@@ -51,16 +91,9 @@ def emitter():
 
     exportSection = createSection(section.EXPORT, encodeVector([exportData]))
 
-    code = []
-    code.append(opCodes.GET_LOCAL)
-    code.append(unsignedLEB128(0))
-    code.append(opCodes.GET_LOCAL)
-    code.append(unsignedLEB128(1))
-    code.append(opCodes.F32_ADD)
-
     functionBody = []
     functionBody.append(EMPTY_ARRAY)
-    functionBody.extend(code)
+    functionBody.extend(codeFromAst(ast))
     functionBody.append(opCodes.END)
 
     functionBody = encodeVector(functionBody)
@@ -71,6 +104,7 @@ def emitter():
     result.extend(magicModuleHeader)
     result.extend(moduleVersion)
     result.extend(typeSection)
+    result.extend(importSection)
     result.extend(funcSection)
     result.extend(exportSection)
     result.extend(codeSection)
