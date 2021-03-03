@@ -3,7 +3,7 @@ from wasmCode import section
 from wasmCode import exportTypes
 from wasmCode import valTypes
 from collections.abc import Iterable
-from encoding import unsignedLEB128Man
+from encoding import unsignedLEB128
 from encoding import encodeString
 
 magicModuleHeader = [0x00, 0x61, 0x73, 0x6d]
@@ -21,26 +21,41 @@ def flatten(data):
 def encodeVector(data):
     result = []
     length = len(data)
-    print(f'data length: {length}')
-    encodedLen = unsignedLEB128Man(length)
-    print(f'LE encoded length: {encodedLen}')
+    encodedLen = unsignedLEB128(length)
     result.append(encodedLen)
-    print(f'encoding: {data}')
     result.extend(flatten(data))
     return result
 
 def createSection(sectionType: int, data: list):
     result = []
     result.append(sectionType)
-    result.extend(encodeVector([data]))
+    result.extend(encodeVector(data))
     return result
 
 def emitter():
+    addFunctionType = []
+    addFunctionType.append(FUNCTION_TYPE)
+    addFunctionType.extend(encodeVector([valTypes.FLOAT32, valTypes.FLOAT32]))
+    addFunctionType.extend(encodeVector([valTypes.FLOAT32]))
+
+    typeSection = createSection(section.TYPE, encodeVector([addFunctionType]))
+
+    funcSection = createSection(section.FUNC, encodeVector([
+        0x00 # type index
+    ]))
+
+    exportData = []
+    exportData.extend(encodeString('run'))
+    exportData.append(exportTypes.FUNC)
+    exportData.append(0x00) # function index
+
+    exportSection = createSection(section.EXPORT, encodeVector([exportData]))
+
     code = []
     code.append(opCodes.GET_LOCAL)
-    code.extend(unsignedLEB128Man(0))
+    code.append(unsignedLEB128(0))
     code.append(opCodes.GET_LOCAL)
-    code.extend(unsignedLEB128Man(1))
+    code.append(unsignedLEB128(1))
     code.append(opCodes.F32_ADD)
 
     functionBody = []
@@ -51,22 +66,6 @@ def emitter():
     functionBody = encodeVector(functionBody)
 
     codeSection = createSection(section.CODE, encodeVector([functionBody]))
-
-    addFunctionType = []
-    addFunctionType.append(FUNCTION_TYPE)
-    addFunctionType.extend(encodeVector([valTypes.FLOAT32, valTypes.FLOAT32]))
-    addFunctionType.extend(encodeVector([valTypes.FLOAT32]))
-
-    typeSection = createSection(section.TYPE, encodeVector(addFunctionType))
-
-    funcSection = createSection(section.FUNC, encodeVector([0x00]))
-
-    exportData = []
-    exportData.extend(encodeString('run'))
-    exportData.append(exportTypes.FUNC)
-    exportData.append(0x00)
-
-    exportSection = createSection(section.EXPORT, encodeVector(exportData))
 
     result = []
     result.extend(magicModuleHeader)

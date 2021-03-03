@@ -8,11 +8,15 @@ const flatten = (arr: any[]) => [].concat.apply([], arr);
 
 const encodeVector = (data: any[]) => {
     console.log(`encoding length: ${data.length}`);
+    console.log(`encoding length LE: ${unsignedLEB128(data.length)}`)
     console.log(`encoding data: ${data}`)
-    return [
-        unsignedLEB128(data.length),
+    let res = [
+        ...unsignedLEB128(data.length),
         ...flatten(data)
     ]
+    console.log(`encoded vector ${res}`)
+
+    return res;
 };
 
 const createSection = (sectionType: Section, data: any[]) => [

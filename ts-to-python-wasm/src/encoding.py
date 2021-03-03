@@ -1,19 +1,17 @@
-unsignedLEB128 = lambda number: bytearray(number.to_bytes(16, byteorder='little', signed=False))
+import struct
 
-def unsignedLEB128Man(number: int):
-    buffer = []
-    while True:
-        byte = number & 0x7f
-        number >>= 7
-        if number != 0:
-            byte |= 0x80
-        buffer.append(byte)
-        if number == 0:
-            break
-    return buffer
+unsignedLEB128 = lambda number: int.from_bytes(bytes(bytearray(number.to_bytes(16, byteorder='little', signed=False))), 'little')
+
+signedLEB128 = lambda number: int.from_bytes(bytes(bytearray(number.to_bytes(16, byteorder='little', signed=True))), 'little')
 
 def encodeString(value: str):
     strBytes = [ord(c) for c in value]
     strBytes.insert(0, len(value))
-    print(f'encoded string: {strBytes}')
     return strBytes
+
+# function for converting decimal to binary
+float_bin = lambda x: x > 0 and str(bin(x))[2:] or "-" + str(bin(x))[3:]
+
+def ieee754(num):
+    val = struct.unpack('I', struct.pack('f', num))[0]
+    return float_bin(val)
