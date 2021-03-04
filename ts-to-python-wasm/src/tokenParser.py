@@ -12,7 +12,7 @@ def Parse(tokens: list[Token]):
     currentToken = next(iterator)
 
     def eatToken():
-        global currentToken
+        nonlocal currentToken
         currentToken = next(iterator, None)
     
     def parseExpression():

@@ -1,7 +1,7 @@
 from wasmCode import opCodes, section, exportTypes, valTypes
 from collections.abc import Iterable
 from encoding import unsignedLEB128, encodeString, ieee754
-from models.node import Program, ExpressionNode
+from models.node import Program, ExpressionNode, StatementNode
 from infrastructure.switcher import switch
 
 magicModuleHeader = [0x00, 0x61, 0x73, 0x6d]
@@ -48,17 +48,15 @@ def codeFromAst(ast: Program):
             'numberLiteral': numExpr
         }, None)
     
-    def processItem(item: StatementNode):
-        def printStmt():
-            emitExpression(item.expression)
-            code.append(opCodes.CALL)
-            code.append(unsignedLEB128(0))
-
-        switch(item.type, {
-            'printStatement': printStmt
-        }, None)
+    def printStmt(expression):
+        emitExpression(expression)
+        code.append(opCodes.CALL)
+        code.append(unsignedLEB128(0))
     
-    ast.forEach(processItem)
+    for item in ast:
+        switch(item.type, {
+            'printStatement': lambda: printStmt(item.expression)
+        }, None)
 
     return code
 
