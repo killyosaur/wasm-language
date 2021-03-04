@@ -15,6 +15,7 @@ F32_EQ = 0x5b
 F32_LT = 0x5d
 F32_GT = 0x5e
 I32_AND = 0x71
+I32_OR = 0x72
 F32_ADD = 0x92
 F32_SUB = 0x93
 F32_MUL = 0x94
@@ -29,5 +30,6 @@ binaryOpCodes = {
     "==": F32_EQ,
     ">": F32_GT,
     "<": F32_LT,
-    "&&": I32_AND
+    "&&": I32_AND,
+    "||": I32_OR
 }

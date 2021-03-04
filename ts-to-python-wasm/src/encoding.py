@@ -9,9 +9,9 @@ def encodeString(value: str):
     strBytes.insert(0, len(value))
     return strBytes
 
-# function for converting decimal to binary
-float_bin = lambda x: x > 0 and str(bin(x))[2:] or "-" + str(bin(x))[3:]
-
-def ieee754(num):
+def ieee754(num: float):
     val = struct.unpack('I', struct.pack('f', num))[0]
-    return float_bin(val)
+    hexVal = hex(val)[2:]
+
+    hexAsIntArr = [int(hexVal[i:i+2],16) for i in range(0,len(hexVal),2)]
+    return reversed(hexAsIntArr)

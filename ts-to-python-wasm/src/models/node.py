@@ -1,11 +1,27 @@
+from enum import Enum
+
+Operator = Enum(
+    value = 'Operator',
+    names = [
+        ('+', 1),
+        ('-', 2),
+        ('/', 3),
+        ('*', 4),
+        ('==', 5),
+        ('>', 6),
+        ('<', 7),
+        ('&&', 8),
+        ('||', 9)
+    ]
+)
+
 class Node(object):
     def __init__(self, type):
         self.type = type
 
 class ExpressionNode(Node):
-    def __init__(self, type, value):
+    def __init__(self, type):
         super().__init__(type)
-        self.value = value
 
 class StatementNode(Node):
     def __init__(self, type, expression):
@@ -17,8 +33,16 @@ class Program(list[StatementNode]):
         super().__init__()
 
 class NumberLiteralNode(ExpressionNode):
-    def __init__(self, value):
-        super().__init__('numberLiteral', value)
+    def __init__(self, value: str):
+        super().__init__('numberLiteral')
+        self.value = float(value)
+
+class BinaryExpressionNode(ExpressionNode):
+    def __init__(self, left: ExpressionNode, right: ExpressionNode, operator: Operator):
+        super().__init__('binaryExpression')
+        self.left = left
+        self.right = right
+        self.operator = operator
 
 class PrintStatementNode(StatementNode):
     def __init__(self, expression):

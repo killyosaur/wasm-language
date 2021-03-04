@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from encoding import unsignedLEB128, encodeString, ieee754
 from models.node import Program, ExpressionNode, StatementNode
 from infrastructure.switcher import switch
+from traversal import Traverse
 
 magicModuleHeader = [0x00, 0x61, 0x73, 0x6d]
 moduleVersion = [0x01, 0x00, 0x00, 0x00]
@@ -40,13 +41,17 @@ def codeFromAst(ast: Program):
     code: list[int] = []
 
     def emitExpression(node: ExpressionNode):
-        def numExpr():
-            code.append(opCodes.F32_CONST)
-            code.extend(ieee754(node.value))
+        def visitor(node: ExpressionNode):
+            def numExpr():
+                code.append(opCodes.F32_CONST)
+                code.extend(ieee754(node.value))
+            def binaryExpr():
+                code.append(opCodes.binaryOpCodes[node.operator.name])
 
-        switch(node.type, {
-            'numberLiteral': numExpr
-        }, None)
+            switch(node.type, {
+                'numberLiteral': numExpr,
+                'binaryExpression': binaryExpr
+            }, None)
     
     def printStmt(expression):
         emitExpression(expression)
