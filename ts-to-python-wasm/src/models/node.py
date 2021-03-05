@@ -54,5 +54,6 @@ class PrintStatementNode(StatementNode):
         super().__init__('printStatement', expression)
 
 class VariableDeclarationNode(StatementNode):
-    def __init__(self, initializer):
+    def __init__(self, name: str, initializer):
         super().__init__('variableDeclaration', initializer)
+        self.name = name

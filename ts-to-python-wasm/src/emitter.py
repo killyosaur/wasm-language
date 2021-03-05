@@ -39,6 +39,14 @@ def createSection(sectionType: int, data: list):
 
 def codeFromAst(ast: Program):
     code: list[int] = []
+    
+    symbols: dict[str, int] = {}
+
+    def localIndexForSymbol(name: str) -> int:
+        if name not in symbols:
+            symbols[name] = len(symbols)
+        
+        return symbols[name]
 
     def emitExpression(node: ExpressionNode):
         def visitor(node: ExpressionNode):
@@ -47,10 +55,14 @@ def codeFromAst(ast: Program):
                 code.extend(ieee754(node.value))
             def binaryExpr():
                 code.append(opCodes.binaryOpCodes[node.operator.name])
+            def identifierExpr():
+                code.append(opCodes.GET_LOCAL)
+                code.append(unsignedLEB128(localIndexForSymbol(node.value)))
 
             switch(node.type, {
                 'numberLiteral': numExpr,
-                'binaryExpression': binaryExpr
+                'binaryExpression': binaryExpr,
+                'identifier': identifierExpr
             }, None)
             
         Traverse(node, visitor)
@@ -59,13 +71,21 @@ def codeFromAst(ast: Program):
         emitExpression(expression)
         code.append(opCodes.CALL)
         code.append(unsignedLEB128(0))
+    def varStmt(name, initializer):
+        emitExpression(initializer)
+        code.append(opCodes.SET_LOCAL)
+        code.append(unsignedLEB128(localIndexForSymbol(name)))
     
     for item in ast:
         switch(item.type, {
-            'printStatement': lambda: printStmt(item.expression)
+            'printStatement': lambda: printStmt(item.expression),
+            'variableDeclaration': lambda: varStmt(item.name, item.expression)
         }, None)
 
-    return code
+    return {
+        'code': code,
+        'localCount': len(symbols)
+    }
 
 def Emitter(ast: Program):
     voidVoidType = [FUNCTION_TYPE, EMPTY_ARRAY, EMPTY_ARRAY]
@@ -96,9 +116,15 @@ def Emitter(ast: Program):
 
     exportSection = createSection(section.EXPORT, encodeVector([exportData]))
 
+    codeData = codeFromAst(ast)
+
+    varLocals = []
+    if codeData['localCount'] > 0:
+        varLocals.append(encodeLocal(codeData['localCount'], valTypes.FLOAT32))
+
     functionBody = []
-    functionBody.append(EMPTY_ARRAY)
-    functionBody.extend(codeFromAst(ast))
+    functionBody.extend(encodeVector(varLocals))
+    functionBody.extend(codeData['code'])
     functionBody.append(opCodes.END)
 
     functionBody = encodeVector(functionBody)

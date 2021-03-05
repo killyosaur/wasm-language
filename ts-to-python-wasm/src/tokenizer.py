@@ -5,10 +5,10 @@ tokens = [
     {'type': TokenType.Keyword, 'value': ['print', 'var']},
     {'type': TokenType.Operator, 'value': ['+', '*', '-', '/', '==', '<', '>', '&&', '||'] },
     {'type': TokenType.Whitespace, 'value': '\\s+'},
-    {'type': TokenType.Number, 'value': '[0-9]+?\.?[0-9]+'},
+    {'type': TokenType.Number, 'value': '([0-9]+)?(\.)?[0-9]+'},
     {'type': TokenType.Parenthesis, 'value': '[()]{1}'},
     {'type': TokenType.Assignment, 'value': '='},
-    {'type': TokenType.Identifier, 'value': '[a-zA-Z_]{0}[a-zA-Z0-9_]+'}
+    {'type': TokenType.Identifier, 'value': '[a-zA-Z]'}
 ]
 
 class TokenizerException(Exception):

@@ -7,7 +7,7 @@ def compile(src: str):
     tokens = Tokenize(src)
     ast = Parse(tokens)
     wasm = Emitter(ast)
-    
+
     f = open("output.wasm", "wb")
     f.write(wasm)
     f.close()
