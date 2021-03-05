@@ -33,9 +33,9 @@ class Program(list[StatementNode]):
         super().__init__()
 
 class NumberLiteralNode(ExpressionNode):
-    def __init__(self, value: str):
+    def __init__(self, value: float):
         super().__init__('numberLiteral')
-        self.value = float(value)
+        self.value = value
 
 class BinaryExpressionNode(ExpressionNode):
     def __init__(self, left: ExpressionNode, right: ExpressionNode, operator: Operator):
@@ -44,6 +44,15 @@ class BinaryExpressionNode(ExpressionNode):
         self.right = right
         self.operator = operator
 
+class IdentifierNode(ExpressionNode):
+    def __init__(self, value: str):
+        super().__init__('identifier')
+        self.value = value
+
 class PrintStatementNode(StatementNode):
     def __init__(self, expression):
         super().__init__('printStatement', expression)
+
+class VariableDeclarationNode(StatementNode):
+    def __init__(self, initializer):
+        super().__init__('variableDeclaration', initializer)

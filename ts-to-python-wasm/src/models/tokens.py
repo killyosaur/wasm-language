@@ -1,8 +1,10 @@
 from enum import Enum
 
 class TokenType(Enum):
+    Assignment = 'assignment'
     Number = 'number'
     Keyword = 'keyword'
+    Identifier = 'identifier'
     Whitespace = 'whitespace'
     Parenthesis = 'parens'
     Operator = 'operator'
