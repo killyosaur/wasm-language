@@ -52,6 +52,8 @@ def codeFromAst(ast: Program):
                 'numberLiteral': numExpr,
                 'binaryExpression': binaryExpr
             }, None)
+            
+        Traverse(node, visitor)
     
     def printStmt(expression):
         emitExpression(expression)
