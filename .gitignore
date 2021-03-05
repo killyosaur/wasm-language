@@ -4,4 +4,5 @@
 **/*.wasm
 
 **/.vs
+**/.vscode/settings.json
 **/__pycache__
