@@ -29,7 +29,7 @@ class StatementNode(Node):
         self.expression = expression
 
 class Program(list[StatementNode]):
-    def __init__():
+    def __init__(self):
         super().__init__()
 
 class NumberLiteralNode(ExpressionNode):
