@@ -2,11 +2,12 @@ from matcher import RegexMatcher
 from models.tokens import TokenType
 
 tokens = [
-    {'type': TokenType.Keyword, 'value': ['print', 'var']},
+    {'type': TokenType.Keyword, 'value': ['print', 'var', 'while']},
     {'type': TokenType.Operator, 'value': ['+', '*', '-', '/', '==', '<', '>', '&&', '||'] },
     {'type': TokenType.Whitespace, 'value': '\\s+'},
     {'type': TokenType.Number, 'value': '([0-9]+)?(\.)?[0-9]+'},
     {'type': TokenType.Parenthesis, 'value': '[()]{1}'},
+    {'type': TokenType.CodeBlock, 'value': '[\{\}]{1}'},
     {'type': TokenType.Assignment, 'value': '='},
     {'type': TokenType.Identifier, 'value': '[a-zA-Z]'}
 ]

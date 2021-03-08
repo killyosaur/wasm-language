@@ -34,6 +34,19 @@ def Parse(tokens: list[Token]):
             right = parseExpression()
             eatToken(')')
             return BinaryExpressionNode(left, right, asOperator(operator))
+        def getCodeBlock():
+            eatToken('{')
+            nodes = []
+            while currentToken.value != '}':
+                if currentToken == None:
+                    raise ParserException('Expected ending "}" bracket', currentToken)
+        
+                if currentToken.type == TokenType.Keyword:
+                    nodes.append(parseStatement())
+                else:
+                    nodes.append(parseExpression())
+            eatToken('}')
+            return CodeBlockNode(nodes)
         def getIdentifier():
             return IdentifierNode(currentToken.value)
         def default():
@@ -48,21 +61,38 @@ def Parse(tokens: list[Token]):
     def parseStatement():
         def keywordSwitch(tokenValue: str):
             def printStatement():
-                eatToken("print")
+                eatToken('print')
                 return PrintStatementNode(parseExpression())
-            def varStatement():
-                eatToken("var")
+            def varDeclareStatement():
+                eatToken('var')
                 name = currentToken.value
                 eatToken()
-                eatToken("=")
+                eatToken('=')
                 return VariableDeclarationNode(name, parseExpression())
+            def varAssignStatement():
+                name = currentToken.value
+                eatToken()
+                eatToken('=')
+                return VariableAssignmentNode(name, parseExpression())
+            def whileStatement('while'):
+                eatToken('while')
+                expression = parseExpression()
+
+                if expression.type != 'binaryExpression':
+                    raise ParserException('expected a logical expression', currentToken)
+
+                return WhileStatementNode(expression, parseExpression())
             def default():
                 raise ParserException(f'Unknown keyword {currentToken.value}', currentToken)
         
-            return switch(tokenValue, {
-                'print': printStatement,
-                'var': varStatement
-            }, default)
+            if currentToken.type == TokenType.Keyword:
+                return switch(tokenValue, {
+                    'print': printStatement,
+                    'var': varStatement,
+                    'while': whileStatement
+                }, default)
+            else if currentToken.type == TokenType.Identifier:
+                return varAssignStatement()
         
         return switch(currentToken.type, {
             TokenType.Keyword: lambda: keywordSwitch(currentToken.value)

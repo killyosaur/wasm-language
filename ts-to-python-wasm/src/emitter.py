@@ -1,7 +1,7 @@
-from wasmCode import opCodes, section, exportTypes, valTypes
+from wasmCode import opCodes, section, exportTypes, valTypes, blockTypes
 from collections.abc import Iterable
-from encoding import unsignedLEB128, encodeString, ieee754
-from models.node import Program, ExpressionNode, StatementNode
+from encoding import unsignedLEB128, signedLEB128, encodeString, ieee754
+from models.node import Program, ExpressionNode, StatementNode, CodeBlockNode
 from infrastructure.switcher import switch
 from traversal import Traverse
 
@@ -58,6 +58,8 @@ def codeFromAst(ast: Program):
             def identifierExpr():
                 code.append(opCodes.GET_LOCAL)
                 code.append(unsignedLEB128(localIndexForSymbol(node.value)))
+            def codeblockExpr():
+                emitStatements(node.statements)                        
 
             switch(node.type, {
                 'numberLiteral': numExpr,
@@ -67,20 +69,52 @@ def codeFromAst(ast: Program):
             
         Traverse(node, visitor)
     
-    def printStmt(expression):
-        emitExpression(expression)
-        code.append(opCodes.CALL)
-        code.append(unsignedLEB128(0))
-    def varStmt(name, initializer):
-        emitExpression(initializer)
-        code.append(opCodes.SET_LOCAL)
-        code.append(unsignedLEB128(localIndexForSymbol(name)))
-    
-    for item in ast:
-        switch(item.type, {
-            'printStatement': lambda: printStmt(item.expression),
-            'variableDeclaration': lambda: varStmt(item.name, item.expression)
-        }, None)
+    def emitStatements(nodes: list[StatementNode])
+        def printStmt(expression):
+            emitExpression(expression)
+            code.append(opCodes.CALL)
+            code.append(unsignedLEB128(0))
+        def varDeclareStmt(name, initializer):
+            emitExpression(initializer)
+            code.append(opCodes.SET_LOCAL)
+            code.append(unsignedLEB128(localIndexForSymbol(name)))
+        def varAssignStmt(name, value):
+            emitExpression(value)
+            code.append(opCodes.SET_LOCAL)
+            code.append(unsignedLEB128(localIndexForSymbol(name)))
+        def whileStmt(expression, statements):
+            # outer block
+            code.append(opCodes.BLOCK)
+            code.append(blockTypes.VOID)
+            # inner loop
+            code.append(opCodes.LOOP)
+            code.append(blockTypes.VOID)
+            # compute the while expression
+            emitExpression(expression)
+            code.append(opCodes.I32_EQZ)
+            # break if $label0
+            code.append(opCodes.BR_IF)
+            code.append(signedLEB128(1))
+            # the nested logic
+            if statements is StatementNode:
+                emitStatements([statements])
+            else:
+                emitExpression(statements)
+            # break $label1
+            code.append(opCodes.BR)
+            code.append(signedLEB128(0))
+            # end loop
+            code.append(opCodes.END)
+            # end block
+            code.append(opCodes.END)
+        
+        for item in nodes:
+            switch(item.type, {
+                'printStatement': lambda: printStmt(item.expression),
+                'variableDeclaration': lambda: varDeclareStmt(item.name, item.expression),
+                'variableAssignment': lambda: varAssignStmt(item.name, item.expression),
+                'whileStatement': lambda: whileStmt(item.expression, item.statements)
+            }, None)
 
     return {
         'code': code,

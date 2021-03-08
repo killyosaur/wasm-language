@@ -7,6 +7,7 @@ class TokenType(Enum):
     Identifier = 'identifier'
     Whitespace = 'whitespace'
     Parenthesis = 'parens'
+    CodeBlock = 'block'
     Operator = 'operator'
 
 class Token(object):

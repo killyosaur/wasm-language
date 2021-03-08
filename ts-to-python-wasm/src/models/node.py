@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Union
 
 Operator = Enum(
     value = 'Operator',
@@ -44,6 +45,11 @@ class BinaryExpressionNode(ExpressionNode):
         self.right = right
         self.operator = operator
 
+class CodeBlockNode(ExpressionNode):
+    def __init__(self, nodes: list[StatementNode]):
+        super().__init__('codeBlockExpression')
+        self.nodes = nodes
+
 class IdentifierNode(ExpressionNode):
     def __init__(self, value: str):
         super().__init__('identifier')
@@ -53,7 +59,17 @@ class PrintStatementNode(StatementNode):
     def __init__(self, expression):
         super().__init__('printStatement', expression)
 
+class WhileStatementNode(StatementNode):
+    def __init__(self, expression: BinaryExpressionNode, body: Union[CodeBlockNode, StatementNode]):
+        super().__init__('whileStatement', expression)
+        self.body = body
+
 class VariableDeclarationNode(StatementNode):
     def __init__(self, name: str, initializer):
         super().__init__('variableDeclaration', initializer)
+        self.name = name
+
+class VariableAssignmentNode(StatementNode):
+    def __init__(self, name: str, value):
+        super().__init__('variableAssignment', value)
         self.name = name
