@@ -1,7 +1,8 @@
 from wasmCode import opCodes, section, exportTypes, valTypes, blockTypes
 from collections.abc import Iterable
 from encoding import unsignedLEB128, signedLEB128, encodeString, ieee754
-from models.node import Program, ExpressionNode, StatementNode, CodeBlockNode
+from models.node import Program, ExpressionNode, StatementNode
+from models.expressionNodes import CodeBlockNode
 from infrastructure.switcher import switch
 from traversal import Traverse
 

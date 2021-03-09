@@ -1,6 +1,8 @@
 from infrastructure.switcher import switch
 from models.tokens import Token, TokenType
-from models.node import ExpressionNode, StatementNode, NumberLiteralNode, PrintStatementNode, Operator, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, VariableAssignmentNode, WhileStatementNode, CodeBlockNode
+from models.node import ExpressionNode, StatementNode, Operator
+import models.expressionNodes as exn
+import models.statementNodes as stn
 
 class ParserException(Exception):
     def __init__(self, message, token):
@@ -23,7 +25,7 @@ def Parse(tokens: list[Token]):
     
     def parseExpression():
         def getNumber():
-            node = NumberLiteralNode(float(currentToken.value))
+            node = exn.NumberLiteralNode(float(currentToken.value))
             eatToken()
             return node
         def getParens():
@@ -33,7 +35,7 @@ def Parse(tokens: list[Token]):
             eatToken()
             right = parseExpression()
             eatToken(')')
-            return BinaryExpressionNode(left, right, asOperator(operator))
+            return exn.BinaryExpressionNode(left, right, asOperator(operator))
         def getCodeBlock():
             eatToken('{')
             nodes = []
@@ -45,9 +47,9 @@ def Parse(tokens: list[Token]):
                 nodes.append(parseStatement())
 
             eatToken('}')
-            return CodeBlockNode(nodes)
+            return exn.CodeBlockNode(nodes)
         def getIdentifier():
-            node = IdentifierNode(currentToken.value)
+            node = exn.IdentifierNode(currentToken.value)
             eatToken()
             return node
         def default():
@@ -65,17 +67,17 @@ def Parse(tokens: list[Token]):
             name = currentToken.value
             eatToken()
             eatToken('=')
-            return VariableAssignmentNode(name, parseExpression())
+            return stn.VariableAssignmentNode(name, parseExpression())
         def keywordSwitch(tokenValue: str):
             def printStatement():
                 eatToken('print')
-                return PrintStatementNode(parseExpression())
+                return stn.PrintStatementNode(parseExpression())
             def varDeclareStatement():
                 eatToken('var')
                 name = currentToken.value
                 eatToken()
                 eatToken('=')
-                return VariableDeclarationNode(name, parseExpression())
+                return stn.VariableDeclarationNode(name, parseExpression())
             def whileStatement():
                 eatToken('while')
                 expression = parseExpression()
@@ -83,7 +85,7 @@ def Parse(tokens: list[Token]):
                 if expression.type != 'binaryExpression':
                     raise ParserException('expected a logical expression', currentToken)
 
-                return WhileStatementNode(expression, parseExpression())
+                return stn.WhileStatementNode(expression, parseExpression())
             def default():
                 raise ParserException(f'Unknown keyword {currentToken.value}', currentToken)
         
