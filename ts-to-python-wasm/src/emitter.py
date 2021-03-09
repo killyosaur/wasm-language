@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from encoding import unsignedLEB128, signedLEB128, encodeString, ieee754
 from models.node import Program, ExpressionNode, StatementNode
 from models.expressionNodes import CodeBlockNode
+from models.statementNodes import SetPixelStatementNode
 from infrastructure.switcher import switch
 from traversal import Traverse
 
@@ -108,13 +109,54 @@ def codeFromAst(ast: Program):
             code.append(opCodes.END)
             # end block
             code.append(opCodes.END)
+        def setpixelStmt(node: SetPixelStatementNode):
+            x = unsignedLEB128(localIndexForSymbol('x'))
+            y = unsignedLEB128(localIndexForSymbol('y'))
+            color = unsignedLEB128(localIndexForSymbol('color'))
+
+            # compute and cache the setpixel parameters
+            emitExpression(node.x)
+            code.append(opCodes.SET_LOCAL)
+            code.append(x)
+
+            emitExpression(node.y)
+            code.append(opCodes.SET_LOCAL)
+            code.append(y)
+
+            emitExpression(node.color)
+            code.append(opCodes.SET_LOCAL)
+            code.append(color)
+
+            # compute the offset (x * 100) + y
+            code.append(opCodes.GET_LOCAL)
+            code.append(y)
+            code.append(opCodes.F32_CONST)
+            code.append(ieee754(100))
+            code.append(opCodes.F32_MUL)
+
+            code.append(opCodes.GET_LOCAL)
+            code.append(x)
+            code.append(opCodes.F32_ADD)
+
+            # convert to an integer
+            code.append(opCodes.I32_TRUNC_F32_S)
+
+            # fetch the color
+            code.append(opCodes.GET_LOCAL)
+            code.append(color)
+            code.append(opCodes.I32_TRUNC_F32_S)
+
+            # write the pixel
+            code.append(opCodes.I32_STORE_8)
+            code.extend([0x00, 0x00]) # align and offset
         
         for item in nodes:
             switch(item.type, {
                 'printStatement': lambda: printStmt(item.expression),
                 'variableDeclaration': lambda: varDeclareStmt(item.name, item.expression),
                 'variableAssignment': lambda: varAssignStmt(item.name, item.expression),
-                'whileStatement': lambda: whileStmt(item.expression, item.body)
+                'whileStatement': lambda: whileStmt(item.expression, item.body),
+                'setpixelStatment': lambda: setpixelStmt(item)
             }, None)
 
     emitStatements(ast)
@@ -144,7 +186,15 @@ def Emitter(ast: Program):
     printFunctionImport.append(exportTypes.FUNC)
     printFunctionImport.append(0x01) # type index
 
-    importSection = createSection(section.IMPORT, encodeVector([printFunctionImport]))
+    memoryImport = []
+    memoryImport.extend(encodeString('env'))
+    memoryImport.extend(encodeString('memory'))
+    memoryImport.append(exportTypes.MEM)
+    # limits https://webassembly.github.io/spec/core/binary/types.html#limits -
+    # indicates a min memory size of one page
+    memoryImport.extend([0x00, 0x01])
+
+    importSection = createSection(section.IMPORT, encodeVector([printFunctionImport, memoryImport]))
 
     exportData = []
     exportData.extend(encodeString('run'))

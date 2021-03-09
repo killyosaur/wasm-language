@@ -2,7 +2,7 @@ from matcher import RegexMatcher
 from models.tokens import TokenType
 
 tokens = [
-    {'type': TokenType.Keyword, 'value': ['print', 'var', 'while']},
+    {'type': TokenType.Keyword, 'value': ['print', 'var', 'while', 'setpixel']},
     {'type': TokenType.Operator, 'value': ['+', '*', '-', '/', '==', '<', '>', '&&', '||'] },
     {'type': TokenType.Whitespace, 'value': '\\s+'},
     {'type': TokenType.Number, 'value': '([0-9]+)?(\.)?[0-9]+'},

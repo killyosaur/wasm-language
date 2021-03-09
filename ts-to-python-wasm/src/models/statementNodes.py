@@ -1,4 +1,4 @@
-from models.node import StatementNode
+from models.node import StatementNode, ExpressionNode
 from models.expressionNodes import BinaryExpressionNode, CodeBlockNode
 from typing import Union
 
@@ -20,3 +20,10 @@ class VariableAssignmentNode(StatementNode):
     def __init__(self, name: str, value):
         super().__init__('variableAssignment', value)
         self.name = name
+
+class SetPixelStatementNode(StatementNode):
+    def __init__(self, x: ExpressionNode, y: ExpressionNode, color: ExpressionNode):
+        self.x = x
+        self.y = y
+        self.color = color
+        super().__init__('setPixelStatement', None)

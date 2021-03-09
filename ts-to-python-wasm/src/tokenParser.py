@@ -86,13 +86,17 @@ def Parse(tokens: list[Token]):
                     raise ParserException('expected a logical expression', currentToken)
 
                 return stn.WhileStatementNode(expression, parseExpression())
+            def setpixelStatement():
+                eatToken('setpixel')
+                return stn.SetPixelStatementNode(parseExpression(), parseExpression(), parseExpression())
             def default():
                 raise ParserException(f'Unknown keyword {currentToken.value}', currentToken)
         
             return switch(tokenValue, {
                 'print': printStatement,
                 'var': varDeclareStatement,
-                'while': whileStatement
+                'while': whileStatement,
+                'setpixel': setpixelStatement
             }, default)
         
         return switch(currentToken.type, {
