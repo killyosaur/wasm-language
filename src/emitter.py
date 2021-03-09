@@ -192,7 +192,7 @@ def codeFromAst(ast: Program):
                 'variableDeclaration': lambda: varDeclareStmt(item.name, item.expression),
                 'variableAssignment': lambda: varAssignStmt(item.name, item.expression),
                 'whileStatement': lambda: whileStmt(item.expression, item.body),
-                'setpixelStatment': lambda: setpixelStmt(item)
+                'setpixelStatement': lambda: setpixelStmt(item)
             }, None)
 
     emitStatements(ast)
