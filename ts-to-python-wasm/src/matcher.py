@@ -8,7 +8,7 @@ class RegexMatcher:
         finalRegex = regex
         if(isinstance(regex, list)):
             regex = map(escapeRegEx, regex)
-            finalRegex = '|'.join(regex)
+            finalRegex = '|^'.join(regex)
 
         self.regex = re.compile(f'^{finalRegex}')
         self.type = typeVal

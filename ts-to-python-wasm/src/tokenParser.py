@@ -48,7 +48,9 @@ def Parse(tokens: list[Token]):
             eatToken('}')
             return CodeBlockNode(nodes)
         def getIdentifier():
-            return IdentifierNode(currentToken.value)
+            node = IdentifierNode(currentToken.value)
+            eatToken()
+            return node
         def default():
             raise ParserException(f'Unexpected token type {currentToken.type}', currentToken)
         
