@@ -1,6 +1,6 @@
 from infrastructure.switcher import switch
 from models.tokens import Token, TokenType
-from models.node import ExpressionNode, StatementNode, NumberLiteralNode, PrintStatementNode, Operator, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode
+from models.node import ExpressionNode, StatementNode, NumberLiteralNode, PrintStatementNode, Operator, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, VariableAssignmentNode, WhileStatementNode, CodeBlockNode
 
 class ParserException(Exception):
     def __init__(self, message, token):
@@ -41,10 +41,9 @@ def Parse(tokens: list[Token]):
                 if currentToken == None:
                     raise ParserException('Expected ending "}" bracket', currentToken)
         
-                if currentToken.type == TokenType.Keyword:
-                    nodes.append(parseStatement())
-                else:
-                    nodes.append(parseExpression())
+                print(f'{currentToken.type}:{currentToken.value}')
+                nodes.append(parseStatement())
+
             eatToken('}')
             return CodeBlockNode(nodes)
         def getIdentifier():
@@ -57,10 +56,16 @@ def Parse(tokens: list[Token]):
         return switch(currentToken.type, {
             TokenType.Number: getNumber,
             TokenType.Parenthesis: getParens,
-            TokenType.Identifier: getIdentifier
+            TokenType.Identifier: getIdentifier,
+            TokenType.CodeBlock: getCodeBlock
         }, default)
     
     def parseStatement():
+        def varAssignStatement():
+            name = currentToken.value
+            eatToken()
+            eatToken('=')
+            return VariableAssignmentNode(name, parseExpression())
         def keywordSwitch(tokenValue: str):
             def printStatement():
                 eatToken('print')
@@ -71,12 +76,7 @@ def Parse(tokens: list[Token]):
                 eatToken()
                 eatToken('=')
                 return VariableDeclarationNode(name, parseExpression())
-            def varAssignStatement():
-                name = currentToken.value
-                eatToken()
-                eatToken('=')
-                return VariableAssignmentNode(name, parseExpression())
-            def whileStatement('while'):
+            def whileStatement():
                 eatToken('while')
                 expression = parseExpression()
 
@@ -87,17 +87,15 @@ def Parse(tokens: list[Token]):
             def default():
                 raise ParserException(f'Unknown keyword {currentToken.value}', currentToken)
         
-            if currentToken.type == TokenType.Keyword:
-                return switch(tokenValue, {
-                    'print': printStatement,
-                    'var': varStatement,
-                    'while': whileStatement
-                }, default)
-            else if currentToken.type == TokenType.Identifier:
-                return varAssignStatement()
+            return switch(tokenValue, {
+                'print': printStatement,
+                'var': varDeclareStatement,
+                'while': whileStatement
+            }, default)
         
         return switch(currentToken.type, {
-            TokenType.Keyword: lambda: keywordSwitch(currentToken.value)
+            TokenType.Keyword: lambda: keywordSwitch(currentToken.value),
+            TokenType.Identifier: varAssignStatement
         }, lambda: None)
     
     nodes = []

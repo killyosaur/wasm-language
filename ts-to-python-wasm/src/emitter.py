@@ -69,7 +69,7 @@ def codeFromAst(ast: Program):
             
         Traverse(node, visitor)
     
-    def emitStatements(nodes: list[StatementNode])
+    def emitStatements(nodes: list[StatementNode]):
         def printStmt(expression):
             emitExpression(expression)
             code.append(opCodes.CALL)
@@ -82,7 +82,7 @@ def codeFromAst(ast: Program):
             emitExpression(value)
             code.append(opCodes.SET_LOCAL)
             code.append(unsignedLEB128(localIndexForSymbol(name)))
-        def whileStmt(expression, statements):
+        def whileStmt(expression, body):
             # outer block
             code.append(opCodes.BLOCK)
             code.append(blockTypes.VOID)
@@ -96,10 +96,10 @@ def codeFromAst(ast: Program):
             code.append(opCodes.BR_IF)
             code.append(signedLEB128(1))
             # the nested logic
-            if statements is StatementNode:
-                emitStatements([statements])
+            if body is StatementNode:
+                emitStatements([body])
             else:
-                emitExpression(statements)
+                emitExpression(body)
             # break $label1
             code.append(opCodes.BR)
             code.append(signedLEB128(0))
@@ -113,8 +113,10 @@ def codeFromAst(ast: Program):
                 'printStatement': lambda: printStmt(item.expression),
                 'variableDeclaration': lambda: varDeclareStmt(item.name, item.expression),
                 'variableAssignment': lambda: varAssignStmt(item.name, item.expression),
-                'whileStatement': lambda: whileStmt(item.expression, item.statements)
+                'whileStatement': lambda: whileStmt(item.expression, item.body)
             }, None)
+
+    emitStatements(ast)
 
     return {
         'code': code,
