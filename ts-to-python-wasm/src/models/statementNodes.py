@@ -11,6 +11,12 @@ class WhileStatementNode(StatementNode):
         super().__init__('whileStatement', expression)
         self.body = body
 
+class IfStatementNode(StatementNode):
+    def __init__(self, expression: BinaryExpressionNode, consequent: Union[CodeBlockNode, StatementNode], alternate: Union[CodeBlockNode, StatementNode]):
+        super().__init__('ifStatement', expression)
+        self.consequent = consequent
+        self.alternate = alternate
+
 class VariableDeclarationNode(StatementNode):
     def __init__(self, name: str, initializer):
         super().__init__('variableDeclaration', initializer)

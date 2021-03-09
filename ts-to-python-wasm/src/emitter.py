@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from encoding import unsignedLEB128, signedLEB128, encodeString, ieee754
 from models.node import Program, ExpressionNode, StatementNode
 from models.expressionNodes import CodeBlockNode
-from models.statementNodes import SetPixelStatementNode
+from models.statementNodes import SetPixelStatementNode, IfStatementNode
 from infrastructure.switcher import switch
 from traversal import Traverse
 
@@ -149,6 +149,42 @@ def codeFromAst(ast: Program):
             # write the pixel
             code.append(opCodes.I32_STORE_8)
             code.extend([0x00, 0x00]) # align and offset
+        def ifStmt(node: IfStatementNode):
+            # if block
+            code.append(opCodes.BLOCK)
+            code.append(blockTypes.VOID)
+            # compute the if expression
+            emitExpression(node.expression)
+            code.append(opCodes.I32_EQZ)
+            # break if $label0
+            code.append(opCodes.BR_IF)
+            code.append(signedLEB128(0))
+            # the nested logic
+            if node.consequent is StatementNode:
+                emitStatements([node.consequent])
+            else:
+                emitExpression(node.consequent)
+            # end block
+            code.append(opCodes.END)
+
+            # else block
+            code.append(opCodes.BLOCK)
+            code.append(blockTypes.VOID)
+            # compute the if expression
+            emitExpression(node.expression)
+            code.append(opCodes.I32_CONST)
+            code.append(signedLEB128(1))
+            code.append(opCodes.I32_EQ)
+            # break if $label0
+            code.append(opCodes.BR_IF)
+            code.append(signedLEB128(0))
+            # more nested logic, moose bytes kan be nasti
+            if node.alternate is StatementNode:
+                emitStatements([node.alternate])
+            elif node.alternate is CodeBlockNode:
+                emitExpression(node.alternate)
+            # end block
+            code.append(opCodes.END)
         
         for item in nodes:
             switch(item.type, {

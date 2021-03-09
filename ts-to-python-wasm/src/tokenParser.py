@@ -85,10 +85,38 @@ def Parse(tokens: list[Token]):
                 if expression.type != 'binaryExpression':
                     raise ParserException('expected a logical expression', currentToken)
 
-                return stn.WhileStatementNode(expression, parseExpression())
+                if currentToken.type == TokenType.CodeBlock:
+                    return stn.WhileStatementNode(expression, parseExpression())
+                
+                return stn.WhileStatementNode(expression, parseStatement())
+
             def setpixelStatement():
                 eatToken('setpixel')
                 return stn.SetPixelStatementNode(parseExpression(), parseExpression(), parseExpression())
+            def ifStatement():
+                eatToken('if')
+
+                expression = parseExpression()
+
+                if expression.type != 'binaryExpression':
+                    raise ParserException('expected a logical expression', currentToken)
+
+                consequent = None
+                alternate = None
+                if currentToken.type == TokenType.CodeBlock:
+                    consequent = parseExpression()
+                else:
+                    consequent = parseStatement()
+
+                if currentToken.value == 'else':
+                    eatToken('else')
+                    if currentToken.type == TokenType.CodeBlock:
+                        alternate = parseExpression()
+                    else:
+                        alternate = parseStatement()
+                
+                return stn.IfStatementNode(expression, consequent, alternate)
+
             def default():
                 raise ParserException(f'Unknown keyword {currentToken.value}', currentToken)
         
@@ -96,7 +124,8 @@ def Parse(tokens: list[Token]):
                 'print': printStatement,
                 'var': varDeclareStatement,
                 'while': whileStatement,
-                'setpixel': setpixelStatement
+                'setpixel': setpixelStatement,
+                'if': ifStatement
             }, default)
         
         return switch(currentToken.type, {
