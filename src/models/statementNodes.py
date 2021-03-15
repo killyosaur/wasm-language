@@ -33,3 +33,14 @@ class SetPixelStatementNode(StatementNode):
         self.y = y
         self.color = color
         super().__init__('setPixelStatement', None)
+
+class CallStatementNode(StatementNode):
+    def __init__(self, args: list):
+        super().__init__('callStatement', None)
+        self.args = args
+
+class ProcStatementNode(StatementNode):
+    def __init__(self, name: str, args: list, expression: ExpressionNode):
+        super().__init__('procStatement', expression)
+        self.args = args
+        self.name = name

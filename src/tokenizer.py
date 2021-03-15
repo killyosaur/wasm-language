@@ -2,14 +2,14 @@ from matcher import RegexMatcher
 from models.tokens import TokenType
 
 tokens = [
-    {'type': TokenType.Keyword, 'value': ['print', 'var', 'while', 'setpixel', 'if', 'else']},
-    {'type': TokenType.Operator, 'value': ['+', '*', '-', '/', '==', '<', '>', '&&', '||'] },
+    {'type': TokenType.Keyword, 'value': ['print', 'var', 'while', 'setpixel', 'if', 'else', 'method']},
+    {'type': TokenType.Operator, 'value': ['+', '*', '-', '/', '==', '<', '>', '&&', '||', ','] },
     {'type': TokenType.Whitespace, 'value': '\\s+'},
-    {'type': TokenType.Number, 'value': '([0-9]+)?(\.)?[0-9]+'},
+    {'type': TokenType.Number, 'value': '-?([0-9]+)?(\.)?[0-9]+([eE]-?[0-9]+)?'},
     {'type': TokenType.Parenthesis, 'value': '[()]{1}'},
     {'type': TokenType.CodeBlock, 'value': '[\{\}]{1}'},
     {'type': TokenType.Assignment, 'value': '='},
-    {'type': TokenType.Identifier, 'value': '[a-zA-Z]'}
+    {'type': TokenType.Identifier, 'value': '[_a-zA-Z][_a-zA-Z0-9]+'}
 ]
 
 class TokenizerException(Exception):

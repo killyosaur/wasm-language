@@ -1,4 +1,4 @@
-from wasmCode import opCodes, section, exportTypes, valTypes, blockTypes
+from wasmCode import opCodes, section, exportTypes, numTypes, blockTypes
 from collections.abc import Iterable
 from encoding import unsignedLEB128, signedLEB128, encodeString, ieee754
 from models.node import Program, ExpressionNode, StatementNode
@@ -61,7 +61,7 @@ def codeFromAst(ast: Program):
                 code.append(opCodes.GET_LOCAL)
                 code.append(unsignedLEB128(localIndexForSymbol(node.value)))
             def codeblockExpr():
-                emitStatements(node.statements)                        
+                emitStatements(node.statements)
 
             switch(node.type, {
                 'numberLiteral': numExpr,
@@ -178,7 +178,7 @@ def codeFromAst(ast: Program):
             # break if $label0
             code.append(opCodes.BR_IF)
             code.append(signedLEB128(0))
-            # more nested logic, moose bytes kan be nasti
+            # more nested logic, mØØse bytes kän be nästi
             if node.alternate is StatementNode:
                 emitStatements([node.alternate])
             elif node.alternate is CodeBlockNode:
@@ -207,7 +207,7 @@ def Emitter(ast: Program):
 
     floatVoidType = []
     floatVoidType.append(FUNCTION_TYPE)
-    floatVoidType.extend(encodeVector([valTypes.FLOAT32]))
+    floatVoidType.extend(encodeVector([numTypes.FLOAT32]))
     floatVoidType.append(EMPTY_ARRAY)
 
     typeSection = createSection(section.TYPE, encodeVector([voidVoidType, floatVoidType]))
@@ -243,7 +243,7 @@ def Emitter(ast: Program):
 
     varLocals = []
     if codeData['localCount'] > 0:
-        varLocals.append(encodeLocal(codeData['localCount'], valTypes.FLOAT32))
+        varLocals.append(encodeLocal(codeData['localCount'], numTypes.FLOAT32))
 
     functionBody = []
     functionBody.extend(encodeVector(varLocals))

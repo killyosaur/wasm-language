@@ -15,3 +15,10 @@ def ieee754(num: float):
 
     hexAsIntArr = [int(hexVal[i:i+2],16) for i in range(0,len(hexVal),2)]
     return reversed(hexAsIntArr)
+
+def ieee754double(num: float):
+    val = struct.unpack('I', struct.pack('d', num))[0]
+    hexVal = hex(val)[2:]
+
+    hexAsIntArr = [int(hexVal[i:i+2], 16) for i in range(0, len(hexVal), 2)]
+    return reversed(hexAsIntArr)

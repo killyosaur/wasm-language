@@ -1,0 +1,2 @@
+FUNC_REF = 0x70
+EXTERN = 0x6f

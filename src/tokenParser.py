@@ -15,15 +15,29 @@ def asOperator(op: str) -> Operator:
 def Parse(tokens: list[Token]):
     iterator = iter(tokens)
     currentToken = next(iterator)
+    nextToken = next(iterator)
 
     def eatToken(value: str = None):
         nonlocal currentToken
+        nonlocal nextToken
+
         if value != None and currentToken.value != value:
             raise ParserException(f"Unexpected token value, expected {value}, received {currentToken.value}", currentToken)
         
-        currentToken = next(iterator, None)
+        currentToken = nextToken
+        nextToken = next(iterator, None)
     
-    def parseExpression():
+    def parseCommaSeparatedList(action: callable):
+        args = []
+        eatToken('(')
+        while currentToken.value !== ')':
+            args.append(action())
+            if(currentToken.value == ','):
+                eatToken(',')
+        eatToken(')')
+        return args
+
+    def parseExpression(parseThis: TokenType = None):
         def getNumber():
             node = exn.NumberLiteralNode(float(currentToken.value))
             eatToken()
@@ -55,6 +69,9 @@ def Parse(tokens: list[Token]):
         def default():
             raise ParserException(f'Unexpected token type {currentToken.type}', currentToken)
         
+        if parseThis != None and currentToken.type != parseThis:
+            raise ParserException(f'Expected token of type {parseThis}', currentToken)
+
         return switch(currentToken.type, {
             TokenType.Number: getNumber,
             TokenType.Parenthesis: getParens,
@@ -68,6 +85,18 @@ def Parse(tokens: list[Token]):
             eatToken()
             eatToken('=')
             return stn.VariableAssignmentNode(name, parseExpression())
+        def callStatement():
+            name = currentToken.value
+            eatToken()
+
+            args = parseCommaSeparatedList(parseExpression)
+
+            return stn.CallStatementNode(args)
+        def varIdentifierParser():
+            if nextToken.value == '=':
+                return varAssignStatement()
+            else:
+                return callStatement()
         def keywordSwitch(tokenValue: str):
             def printStatement():
                 eatToken('print')
@@ -93,6 +122,22 @@ def Parse(tokens: list[Token]):
             def setpixelStatement():
                 eatToken('setpixel')
                 return stn.SetPixelStatementNode(parseExpression(), parseExpression(), parseExpression())
+            def procStatement():
+                eatToken('method')
+
+                name = currentToken.value
+                eatToken()
+
+                def getParams():
+                    arg = exn.IdentifierNode(currentToken.value)
+                    eatToken()
+                    return arg                    
+
+                args = parseCommaSeparatedList(getParams)
+
+                expression = parseExpression(TokenType.CodeBlock)
+
+                return ProcStatementNode(name, args, expression)
             def ifStatement():
                 eatToken('if')
 
@@ -125,12 +170,13 @@ def Parse(tokens: list[Token]):
                 'var': varDeclareStatement,
                 'while': whileStatement,
                 'setpixel': setpixelStatement,
-                'if': ifStatement
+                'if': ifStatement,
+                'proc': procStatement
             }, default)
         
         return switch(currentToken.type, {
             TokenType.Keyword: lambda: keywordSwitch(currentToken.value),
-            TokenType.Identifier: varAssignStatement
+            TokenType.Identifier: varIdentifierParser
         }, lambda: None)
     
     nodes = []

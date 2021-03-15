@@ -1,0 +1,2 @@
+CONST = 0x00
+VAR = 0x01
