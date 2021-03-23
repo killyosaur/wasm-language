@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class TokenType(Enum):
     Assignment = 'assignment'
     Number = 'number'
@@ -9,6 +10,7 @@ class TokenType(Enum):
     Parenthesis = 'parens'
     CodeBlock = 'block'
     Operator = 'operator'
+
 
 class Token(object):
     def __init__(self, typeVal: TokenType, value: str):

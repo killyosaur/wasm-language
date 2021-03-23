@@ -1,0 +1,231 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: a print statement",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "print 8",
+        "-o",
+        "print_stmt"
+      ]
+    },
+    {
+      "name": "Python: multiple print statements",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "print 8 print 24",
+        "-o",
+        "mul_print_stmt"
+      ]
+    },
+    {
+      "name": "Python: print binary",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "print (2 + 4)",
+        "-o",
+        "print_binary"
+      ]
+    },
+    {
+      "name": "Python: a print nested binary",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "print ((6 - 4)+ 10)",
+        "-o",
+        "print_nested_binary"
+      ]
+    },
+    {
+      "name": "Python: var declare",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "var f = 22 print f",
+        "-o",
+        "var_declare"
+      ]
+    },
+    {
+      "name": "Python: var declare 2",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "var foo = 22 print foo",
+        "-o",
+        "var_declare_2"
+      ]
+    },
+    {
+      "name": "Python: var declare floating",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "var f = 22.4 print f",
+        "-o",
+        "var_declare_float"
+      ]
+    },
+    {
+      "name": "Python: var assign",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "var f = 22 f = (f + 1) print f",
+        "-o",
+        "var_assign"
+      ]
+    },
+    {
+      "name": "Python: var assign float",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "var f = 22.5 f = (f + 1.5) print f",
+        "-o",
+        "var_assign_float"
+      ]
+    },
+    {
+      "name": "Python: while statement",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "var f = 0 while (f < 5) { f = (f + 1) print f }",
+        "-o",
+        "while_stmt"
+      ]
+    },
+    {
+      "name": "Python: setpixel",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "setpixel (1, 2, 42)",
+        "-o",
+        "setpixel"
+      ]
+    },
+    {
+      "name": "Python: if statement block",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "var f = 5 if (f<10) { f = (f + 1) print f } if(f>10)print3",
+        "-o",
+        "if_stmt_block"
+      ]
+    },
+    {
+      "name": "Python: if statement",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "var f = 5 if (f<10) print 2 if(f>10)print3",
+        "-o",
+        "if_stmt"
+      ]
+    },
+    {
+      "name": "Python: else statement",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "var f = 5 if (f>10) print 2 else print3",
+        "-o",
+        "else_stmt"
+      ]
+    },
+    {
+      "name": "Python: else block statement",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "var f = 6 if (f>10) print 2 else { f = f+1 print f }",
+        "-o",
+        "else_stmt_block"
+      ]
+    },
+    {
+      "name": "Python: main block",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "proc main() { print 22 }",
+        "-o",
+        "main"
+      ]
+    },
+    {
+      "name": "Python: supports procedure invoke",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "proc foo() { print 27 } proc main() { foo() }",
+        "-o",
+        "proc_stmt"
+      ]
+    },
+    {
+      "name": "Python: supports procedure invoke with args",
+      "type": "python",
+      "request": "launch",
+      "program": "./src/compiler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "proc foo(f) { print (f + 1) } proc main() { foo(28) }",
+        "-o",
+        "proc_stmt_args"
+      ]
+    }
+  ]
+}

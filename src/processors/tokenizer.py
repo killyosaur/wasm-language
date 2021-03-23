@@ -1,17 +1,17 @@
-from matcher import RegexMatcher
-from models.tokens import TokenType
+import re
+from models.tokenizer import Token, TokenType
 
 tokens = [
     {'type': TokenType.Keyword, 'value': [
-        'print', 'var', 'while', 'setpixel', 'if', 'else']},
+        'print', 'var', 'while', 'setpixel', 'if', 'else', 'proc']},
     {'type': TokenType.Operator, 'value': [
-        '+', '*', '-', '/', '==', '<', '>', '&&', '||']},
+        '+', '*', '-', '/', '==', '<', '>', '&&', '||', ',']},
     {'type': TokenType.Whitespace, 'value': '\\s+'},
     {'type': TokenType.Number, 'value': '([0-9]+)?(\.)?[0-9]+'},
     {'type': TokenType.Parenthesis, 'value': '[()]{1}'},
     {'type': TokenType.CodeBlock, 'value': '[\{\}]{1}'},
     {'type': TokenType.Assignment, 'value': '='},
-    {'type': TokenType.Identifier, 'value': '[a-zA-Z]'}
+    {'type': TokenType.Identifier, 'value': '[_a-zA-Z]{1}[a-zA-Z0-9_]*'}
 ]
 
 
@@ -19,6 +19,29 @@ class TokenizerException(Exception):
     def __init__(self, message, index):
         self.message = message
         self.index = index
+
+
+def escapeRegEx(text): return re.sub(
+    r'([-[\]{}()*+?.,\\^$|#\s])', r'\\\1', text)
+
+
+class RegexMatcher:
+    def __init__(self, regex, typeVal):
+        finalRegex = regex
+        if(isinstance(regex, list)):
+            regex = map(escapeRegEx, regex)
+            finalRegex = '|^'.join(regex)
+
+        self.regex = re.compile(f'^{finalRegex}')
+        self.type = typeVal
+
+    def match(self, input: str, index: int):
+        substr = input[index:]
+        m = self.regex.search(substr)
+        if m != None:
+            return Token(self.type, m.group(0))
+        else:
+            return Token(self.type, None)
 
 
 matchers = [RegexMatcher(i['value'], i['type']) for i in tokens]
