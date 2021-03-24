@@ -156,27 +156,27 @@ def codeFromProc(node: ProcStatementNode, program: TransformedProgram) -> list[i
 
     return symbols[name]
 
-  def emitExpression(node: ExpressionNode):
-    def visitor(node: ExpressionNode):
-      def emitNumber():
-        code.append(OpCodes.F32_CONST.value)
-        code.extend(ieee754(node.value))
-      def emitBinaryExpression():
-        code.append(binaryOpCode[node.operator.name])
-      def emitIdentifier():
-        code.append(OpCodes.GET_LOCAL.value)
-        code.append(unsignedLEB128(localIndexForSymbol(node.value)))
-      def emitCodeBlockExpression():
-        emitStatements(node.statements)
+  def emitExpression(eNode: ExpressionNode):
+    if eNode.type == 'blockExpression':
+      emitStatements(eNode.statements)
+    else:
+      def visitor(vNode: ExpressionNode):
+        def emitNumber():
+          code.append(OpCodes.F32_CONST.value)
+          code.extend(ieee754(vNode.value))
+        def emitBinaryExpression():
+          code.append(binaryOpCode[vNode.operator.name])
+        def emitIdentifier():
+          code.append(OpCodes.GET_LOCAL.value)
+          code.append(unsignedLEB128(localIndexForSymbol(vNode.value)))
 
-      switch(node.type, {
-          'numberLiteral': emitNumber,
-          'binaryExpression': emitBinaryExpression,
-          'identifier': emitIdentifier,
-          'blockExpression': emitCodeBlockExpression
-      }, None)
-    
-    traverse(node, visitor)
+        switch(vNode.type, {
+            'numberLiteral': emitNumber,
+            'binaryExpression': emitBinaryExpression,
+            'identifier': emitIdentifier
+        }, None)
+      
+      traverse(eNode, visitor)
 
   def emitStatements(nodes: list[StatementNode]) -> list[int]:
     def emitVariableDeclaration(node: nodeType.VariableDeclarationNode):
